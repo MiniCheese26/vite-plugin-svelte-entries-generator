@@ -52,6 +52,16 @@ const config = {
 export default config;
 ```
 
+### Default transform function
+
+```ts
+const baseTransformPaths = (file: string, entriesBasePath: string) => {
+  const extension = pathFs.extname(file);
+  const fileName = pathFs.basename(file, extension);
+  return `"${entriesBasePath}${fileName}"`;
+};
+```
+
 ### This is a personal tool first
 
 Yeah, this is kinda limited, but it's useful for me in my specific scenario.
