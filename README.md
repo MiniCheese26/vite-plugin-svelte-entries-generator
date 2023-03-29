@@ -1,6 +1,6 @@
 # vite-plugin-svelte-entries-generator
 
-## Why would I need this? Doesn't sveltekit auto-discover all pages to pre-render?
+## Doesn't sveltekit auto-discover all pages to pre-render?
 
 Mostly yes, but under certain circumstances, it is unable to discover all dynamic paths to prerender.
 
