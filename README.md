@@ -16,8 +16,7 @@ globs and base urls to auto-generate the entries array upon `vite build`.
 ### Important Caveat
 
 Right now, this plugin assumes your dynamic routes are importing data from markdown files or something similar. So it's
-expecting to be able to determine the dynamic route id from file paths. If your dynamic route id is frontmatter or from
-an id from a db, this plugin can't help you :(
+expecting to be able to determine the dynamic route id from file paths.
 
 ### Usage
 
@@ -27,7 +26,7 @@ An array of the following object is expected
 - `entriesBasePath: string` - The actual route/url this content is found at, I.E. for `/posts/[slug]` you pass `/posts/`
 - `transform?: (filePath: string, entriesBasePath: string) => Promise<string> | string` - A function for determining how
   the files found via the `contentPath` are transformed for entries url. By default, the filename without the extension
-  will be assumed the slug/id
+  will be assumed the slug/id. You could write a function to read an id from frontmatter data from each file, see example below
 
 ```js
 import entitiesGenerator from 'vite-plugin-svelte-entries-generator';
@@ -62,8 +61,46 @@ const baseTransformPaths = (file: string, entriesBasePath: string) => {
 };
 ```
 
+### Transform function that reads frontmatter id using [gray-matter](https://github.com/jonschlinkert/gray-matter)
+
+```js
+import matter from 'gray-matter';
+import fs from 'fs/promises';
+
+const parse = async (file, entriesBasePath) => {
+    const content = await fs.readFile(file, 'utf-8');
+
+    const matterData = matter(content);
+
+    return `"${entriesBasePath}${matterData.data.id}"`;
+};
+
+export default parse;
+```
+
+Then import it and pass it like so
+
+```js
+import parse from './parse';
+
+/** @type {import('vite').UserConfig} */
+const config = {
+  plugins: [
+    entitiesGenerator({
+      paths: [
+        {
+          contentPath: 'src/content/posts/*.svx',
+          entriesBasePath: '/posts/',
+          transform: parse,
+        }
+      ]
+    })
+  ],
+};
+
+export default config;
+```
+
 ### This is a personal tool first
 
 Yeah, this is kinda limited, but it's useful for me in my specific scenario.
-
-I may add frontmatter data parsing at some point
