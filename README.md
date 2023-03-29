@@ -1,6 +1,6 @@
 # vite-plugin-svelte-entries-generator
 
-### Why would I need this? Doesn't sveltekit auto-discover all pages to pre-render?
+## Why would I need this? Doesn't sveltekit auto-discover all pages to pre-render?
 
 Mostly yes, but under certain circumstances, it is unable to discover all dynamic paths to prerender.
 
@@ -13,12 +13,30 @@ the `prerender.entries` array in the svelte config to tell sveltekit about your 
 But this in inflexible and isn't simple to automate. Hence, this plugin. With this plugin, you can pass an array of
 globs and base urls to auto-generate the entries array upon `vite build`.
 
-### Important Caveat
+## Important Caveat
 
 Right now, this plugin assumes your dynamic routes are importing data from markdown files or something similar. So it's
 expecting to be able to determine the dynamic route id from file paths.
 
-### Usage
+## Usage
+
+Ensure you have `kit.prerender` in `svelte.config.js` somewhere, like so
+
+```js
+const config = {
+  extensions: ['.svelte'],
+  preprocess: [
+    preprocess({
+      postcss: true,
+    })],
+  kit: {
+    adapter: vercel(),
+    prerender: {},
+  },
+};
+```
+
+The `prerender` object can have other data in it, just make sure it exists.
 
 An array of the following object is expected
 
@@ -29,7 +47,7 @@ An array of the following object is expected
   will be assumed the slug/id. You could write a function to read an id from frontmatter data from each file, see example below
 
 ```js
-import entitiesGenerator from 'vite-plugin-svelte-entries-generator';
+import entriesGenerator from 'vite-plugin-svelte-entries-generator';
 
 import {sveltekit} from '@sveltejs/kit/vite';
 
@@ -37,7 +55,7 @@ import {sveltekit} from '@sveltejs/kit/vite';
 const config = {
     plugins: [
         sveltekit(),
-        entitiesGenerator({
+        entriesGenerator({
             paths: [
                 {
                     contentPath: 'src/content/posts/*.svx',
@@ -81,12 +99,16 @@ export default parse;
 Then import it and pass it like so
 
 ```js
+import entriesGenerator from 'vite-plugin-svelte-entries-generator';
 import parse from './parse';
+
+import {sveltekit} from '@sveltejs/kit/vite';
 
 /** @type {import('vite').UserConfig} */
 const config = {
   plugins: [
-    entitiesGenerator({
+    sveltekit(),
+    entriesGenerator({
       paths: [
         {
           contentPath: 'src/content/posts/*.svx',
@@ -101,6 +123,6 @@ const config = {
 export default config;
 ```
 
-### This is a personal tool first
+## This is a personal tool first
 
 Yeah, this is kinda limited, but it's useful for me in my specific scenario.
