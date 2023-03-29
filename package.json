@@ -1,0 +1,60 @@
+{
+  "name": "vite-plugin-svelte-entries-generator",
+  "version": "1.0.0",
+  "description": "A vite plugin to generate sveltekit prerender entries for paths that can't be scraped automatically",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "exports": {
+    "import": "./dist/index.mjs",
+    "require": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "dev": "pnpm build --watch",
+    "build": "pnpm clean && tsup --config tsup.config.ts"
+  },
+  "keywords": [
+    "vite",
+    "svelte",
+    "sveltekit",
+    "entries"
+  ],
+  "author": "pseudorizer",
+  "license": "MIT",
+  "devDependencies": {
+    "@tsconfig/node18": "^1.0.1",
+    "@types/node": "^18.15.11",
+    "glob": "^9.3.2",
+    "rimraf": "^4.4.1",
+    "tsup": "^6.7.0",
+    "typescript": "^5.0.2",
+    "vite": "*"
+  },
+  "peerDependencies": {
+    "vite": "*",
+    "svelte": "*",
+    "@sveltejs/kit": "*"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": false
+    },
+    "svelte": {
+      "optional": false
+    },
+    "@sveltejs/kit": {
+      "optional": false
+    }
+  },
+  "packageManager": "pnpm@8.0.0",
+  "engines": {
+    "node": ">=14"
+  },
+  "files": [
+    "src",
+    "dist"
+  ]
+}
