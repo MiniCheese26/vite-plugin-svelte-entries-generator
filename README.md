@@ -13,6 +13,8 @@ the `prerender.entries` array in the svelte config to tell sveltekit about your 
 But this in inflexible and isn't simple to automate. Hence, this plugin. With this plugin, you can pass an array of
 globs and base urls to auto-generate the entries array upon `vite build`.
 
+### There is an open [issue](https://github.com/sveltejs/kit/issues/9506), opened by Rich Harris that'll hopefully render this plugin obsolete
+
 ## Important Caveat
 
 Right now, this plugin assumes your dynamic routes are importing data from markdown files or something similar. So it's
