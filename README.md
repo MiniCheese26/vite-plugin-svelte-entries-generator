@@ -43,8 +43,8 @@ An array of the following object is expected
 - `contentPath: string` - Glob path for discovering content files
 - `entriesBasePath: string` - The actual route/url this content is found at, I.E. for `/posts/[slug]` you pass `/posts/`
 - `transform?: (filePath: string, entriesBasePath: string) => Promise<string> | string` - A function for determining how
-  the files found via the `contentPath` are transformed for entries url. By default, the filename without the extension
-  will be assumed the slug/id. You could write a function to read an id from frontmatter data from each file, see example below
+  the files found via the `contentPath` are transformed into entry paths. By default, the filename without the extension
+  will be assumed the slug/id. However, you could do something like write a function to read an id from frontmatter data from each file, see the [example](#default-transform-function) below
 
 ```js
 import entriesGenerator from 'vite-plugin-svelte-entries-generator';
