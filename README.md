@@ -11,14 +11,9 @@ Because sveltekit currently lacks something similar to NextJS's `getStaticPaths`
 the `prerender.entries` array in the svelte config to tell sveltekit about your dynamic paths.
 
 But this in inflexible and isn't simple to automate. Hence, this plugin. With this plugin, you can pass an array of
-globs and base urls to auto-generate the entries array upon `vite build`.
+base api paths and a transformer function to auto-generate the entries array upon `vite build`.
 
 ### There is an open [issue](https://github.com/sveltejs/kit/issues/9506), opened by Rich Harris that'll hopefully render this plugin obsolete
-
-## Important Caveat
-
-Right now, this plugin assumes your dynamic routes are importing data from markdown files or something similar. So it's
-expecting to be able to determine the dynamic route id from file paths.
 
 ## Usage
 
@@ -26,15 +21,15 @@ Ensure you have `kit.prerender` in `svelte.config.js` somewhere, like so
 
 ```js
 const config = {
-  extensions: ['.svelte'],
-  preprocess: [
-    preprocess({
-      postcss: true,
-    })],
-  kit: {
-    adapter: vercel(),
-    prerender: {},
-  },
+    extensions: ['.svelte'],
+    preprocess: [
+        preprocess({
+            postcss: true,
+        })],
+    kit: {
+        adapter: vercel(),
+        prerender: {},
+    },
 };
 ```
 
@@ -42,14 +37,14 @@ The `prerender` object can have other data in it, just make sure it exists.
 
 An array of the following object is expected
 
-- `contentPath: string` - Glob path for discovering content files
-- `entriesBasePath: string` - The actual route/url this content is found at, I.E. for `/posts/[slug]` you pass `/posts/`
-- `transform?: (filePath: string, entriesBasePath: string) => Promise<string> | string` - A function for determining how
-  the files found via the `contentPath` are transformed into entry paths. By default, the filename without the extension
-  will be assumed the slug/id. However, you could do something like write a function to read an id from frontmatter data from each file, see the [example](#default-transform-function) below
+- `apiPath: string` - The actual route/url this content is found at, I.E. for `/posts/[slug]` you pass `/posts/`
+- `transform: (apiPath: string, repoRoot: string) => Promise<string | string[]> | string | string[]` - A function that
+  provides the apiPath being processed and the absolute path of the repo, derived from the `package.json` root prop
+  or `process.cwd()`. Each entry/string returned should be wrapped in quotation `""` marks. See [below](#transform-examples) for examples.
 
 ```js
 import entriesGenerator from 'vite-plugin-svelte-entries-generator';
+import postTransformer from './transformers/postTransformer'
 
 import {sveltekit} from '@sveltejs/kit/vite';
 
@@ -60,8 +55,8 @@ const config = {
         entriesGenerator({
             paths: [
                 {
-                    contentPath: 'src/content/posts/*.svx',
-                    entriesBasePath: '/posts/'
+                    transform: postTransformer,
+                    apiPath: '/posts/'
                 }
             ]
         })
@@ -71,60 +66,54 @@ const config = {
 export default config;
 ```
 
-### Default transform function
+## Transform examples
 
 ```ts
-const baseTransformPaths = (file: string, entriesBasePath: string) => {
-  const extension = pathFs.extname(file);
-  const fileName = pathFs.basename(file, extension);
-  return `"${entriesBasePath}${fileName}"`;
-};
-```
-
-### Transform function that reads frontmatter id using [gray-matter](https://github.com/jonschlinkert/gray-matter)
-
-```js
-import matter from 'gray-matter';
+import path from 'path';
+import glob from 'glob';
 import fs from 'fs/promises';
+import matter from 'gray-matter';
+import type { EntriesTransformFunction } from 'vite-plugin-svelte-entries-generator';
 
-const parse = async (file, entriesBasePath) => {
-    const content = await fs.readFile(file, 'utf-8');
+const CONTENT_PATH = 'src/content/posts/*.svx';
 
-    const matterData = matter(content);
-
-    return `"${entriesBasePath}${matterData.data.id}"`;
+const getFilePaths = async (path: string) => {
+	try {
+		return await glob(path);
+	} catch (e) {
+		console.error(`Failed to read ${path}`);
+		return [];
+	}
 };
 
-export default parse;
-```
+// Reads the filename without the extension of some md/svx files and uses that filename as the slug
+export const transformByFilename: EntriesTransformFunction = async (apiPath, repoRoot) => {
+	const fullPath = path.resolve(repoRoot, CONTENT_PATH);
 
-Then import it and pass it like so
+	const fullPaths = await getFilePaths(fullPath);
 
-```js
-import entriesGenerator from 'vite-plugin-svelte-entries-generator';
-import parse from './parse';
-
-import {sveltekit} from '@sveltejs/kit/vite';
-
-/** @type {import('vite').UserConfig} */
-const config = {
-  plugins: [
-    sveltekit(),
-    entriesGenerator({
-      paths: [
-        {
-          contentPath: 'src/content/posts/*.svx',
-          entriesBasePath: '/posts/',
-          transform: parse,
-        }
-      ]
-    })
-  ],
+	return fullPaths.map((filePath) => {
+		const extension = path.extname(filePath);
+		const fileName = path.basename(filePath, extension);
+		return `"${apiPath}${fileName}"`;
+	});
 };
 
-export default config;
+// Reads each md/svx file and parses the frontmatter data to get the posts id and uses that as the slug 
+export const transformById: EntriesTransformFunction = async (apiPath, repoRoot) => {
+	const fullPath = path.resolve(repoRoot, CONTENT_PATH);
+
+	const fullPaths = await getFilePaths(fullPath);
+
+	return await Promise.all(
+		fullPaths.map(async (filePath) => {
+			const content = await fs.readFile(filePath, 'utf-8');
+
+			const matterData = matter(content);
+
+			return `"${apiPath}${matterData.data.id}"`;
+		})
+	);
+};
+
 ```
-
-## This is a personal tool first
-
-Yeah, this is kinda limited, but it's useful for me in my specific scenario.
