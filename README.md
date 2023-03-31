@@ -119,5 +119,5 @@ export const transformById: EntriesTransformFunction = async (apiPath, repoRoot)
 };
 
 ```
-Since this function can do anything, you could call a db to get ids or a redis cache etc
 
+You could also call your db to get ids and so on
