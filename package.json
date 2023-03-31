@@ -2,6 +2,7 @@
   "name": "vite-plugin-svelte-entries-generator",
   "version": "1.0.0",
   "description": "A vite plugin to generate sveltekit prerender entries for paths that can't be scraped automatically",
+  "repository": "github:minicheese26/vite-plugin-svelte-entries-generator",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "exports": {
@@ -49,7 +50,7 @@
       "optional": false
     }
   },
-  "packageManager": "pnpm@8.0.0",
+  "packageManager": "pnpm@8.1.0",
   "engines": {
     "node": ">=14"
   },
