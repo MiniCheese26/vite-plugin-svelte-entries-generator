@@ -41,7 +41,7 @@ An array of the following object is expected
 
 - `apiPath: string` - The actual route/url this content is found at, I.E. for `/posts/[slug]` you pass `/posts/`
 - `transform: (apiPath: string, repoRoot: string) => Promise<string | string[]> | string | string[]` - A function that
-  provides the apiPath being processed and the absolute path of the repo, derived from the `package.json` root prop
+  provides the apiPath being processed and the absolute path of the repo, derived from the vite config root prop
   or `process.cwd()`. Each entry/string returned should be wrapped in quotation `""` marks. See [below](#transform-examples) for examples.
 
 ```js
@@ -119,3 +119,5 @@ export const transformById: EntriesTransformFunction = async (apiPath, repoRoot)
 };
 
 ```
+Since this function can do anything, you could call a db to get ids or a redis cache etc
+
