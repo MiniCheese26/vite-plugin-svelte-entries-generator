@@ -15,7 +15,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "dev": "pnpm build --watch",
-    "build": "pnpm clean && tsup --config tsup.config.ts"
+    "build": "pnpm clean && tsup --config tsup.config.ts",
+    "publish": "pnpm build && pnpm publish"
   },
   "keywords": [
     "vite",
