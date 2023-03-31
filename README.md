@@ -1,3 +1,5 @@
+[![NPM Version](https://badge.fury.io/js/vite-plugin-svelte-entries-generator.svg?style=flat)](https://npmjs.org/package/vite-plugin-svelte-entries-generator)
+
 # vite-plugin-svelte-entries-generator
 
 ## Doesn't sveltekit auto-discover all pages to pre-render?
