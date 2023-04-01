@@ -1,4 +1,4 @@
-import {Plugin} from 'vite';
+import type {Plugin} from 'vite';
 import pathFs from 'path';
 import fs from 'fs/promises';
 
@@ -38,8 +38,8 @@ const plugin = ({paths, repoRoot}: PluginOptions): Plugin => {
             const root = repoRoot ?? config.root ?? process.cwd();
 
             const entries = ['"*"', ...(await Promise.all(paths.map(async (path) => {
-                console.info(`[vite-plugin-svelte-entries-generator] - Running transformer for ${path.apiPath}`)
-                return path.transform(path.apiPath, root);
+                console.info(`[vite-plugin-svelte-entries-generator] - Running transformer for ${path.apiPath}`);
+                return `"${await path.transform(path.apiPath, root)}"`;
             }))).flat()];
 
             const svelteConfigPath = pathFs.resolve(root, SVELTE_CONFIG_FILE);

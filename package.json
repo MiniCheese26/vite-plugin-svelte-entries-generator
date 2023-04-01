@@ -35,9 +35,9 @@
     "vite": "*"
   },
   "peerDependencies": {
-    "vite": "^4.0.0",
+    "@sveltejs/kit": "*",
     "svelte": "*",
-    "@sveltejs/kit": "*"
+    "vite": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "vite": {
