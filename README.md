@@ -37,12 +37,20 @@ const config = {
 
 The `prerender` object can have other data in it, just make sure it exists.
 
-An array of the following object is expected
+### Arguments
 
-- `apiPath: string` - The actual route/url this content is found at, I.E. for `/posts/[slug]` you pass `/posts/`
+- `paths: Path[]` - An array of [Paths](#paths)
+- `repoRoot?: string` - The absolute path of the current repo. If this isn't passed it will be derived from the vite
+  config root prop or if that's undefined `process.cwd()`
+
+#### Paths
+
+- `apiPath: string` - The actual route/url this content is found at, including all dynamic parameters,
+  I.E. `/posts/[slug]`
 - `transform: (apiPath: string, repoRoot: string) => Promise<string | string[]> | string | string[]` - A function that
-  provides the apiPath being processed and the absolute path of the repo, derived from the vite config root prop
-  or `process.cwd()`. Each entry/string returned should be wrapped in quotation `""` marks. See [below](#transform-examples) for examples.
+  provides the apiPath being processed and the absolute path of the repo. This function
+  generates the entry for sveltekit to discover. I'd recommend you `.replace()` on the `apiPath`, replacing the dynamic parameters
+  with your slug/id/whatever. See [below](#transform-examples) for examples.
 
 ```js
 import entriesGenerator from 'vite-plugin-svelte-entries-generator';
@@ -58,7 +66,7 @@ const config = {
             paths: [
                 {
                     transform: postTransformer,
-                    apiPath: '/posts/'
+                    apiPath: '/posts/[slug]'
                 }
             ]
         })
@@ -75,49 +83,50 @@ import path from 'path';
 import glob from 'glob';
 import fs from 'fs/promises';
 import matter from 'gray-matter';
-import type { EntriesTransformFunction } from 'vite-plugin-svelte-entries-generator';
+import type {EntriesTransformFunction} from 'vite-plugin-svelte-entries-generator';
 
 const CONTENT_PATH = 'src/content/posts/*.svx';
 
 const getFilePaths = async (path: string) => {
-	try {
-		return await glob(path);
-	} catch (e) {
-		console.error(`Failed to read ${path}`);
-		return [];
-	}
+    try {
+        return await glob(path);
+    } catch (e) {
+        console.error(`Failed to read ${path}`);
+        return [];
+    }
 };
+
+// The path being processed here is /posts/[slug]
 
 // Reads the filename without the extension of some md/svx files and uses that filename as the slug
 export const transformByFilename: EntriesTransformFunction = async (apiPath, repoRoot) => {
-	const fullPath = path.resolve(repoRoot, CONTENT_PATH);
+    const fullPath = path.resolve(repoRoot, CONTENT_PATH);
 
-	const fullPaths = await getFilePaths(fullPath);
+    const fullPaths = await getFilePaths(fullPath);
 
-	return fullPaths.map((filePath) => {
-		const extension = path.extname(filePath);
-		const fileName = path.basename(filePath, extension);
-		return `"${apiPath}${fileName}"`;
-	});
+    return fullPaths.map((filePath) => {
+        const extension = path.extname(filePath);
+        const fileName = path.basename(filePath, extension);
+        return apiPath.replace(`[slug]`, fileName);
+    });
 };
 
 // Reads each md/svx file and parses the frontmatter data to get the posts id and uses that as the slug 
 export const transformById: EntriesTransformFunction = async (apiPath, repoRoot) => {
-	const fullPath = path.resolve(repoRoot, CONTENT_PATH);
+    const fullPath = path.resolve(repoRoot, CONTENT_PATH);
 
-	const fullPaths = await getFilePaths(fullPath);
+    const fullPaths = await getFilePaths(fullPath);
 
-	return await Promise.all(
-		fullPaths.map(async (filePath) => {
-			const content = await fs.readFile(filePath, 'utf-8');
+    return await Promise.all(
+        fullPaths.map(async (filePath) => {
+            const content = await fs.readFile(filePath, 'utf-8');
 
-			const matterData = matter(content);
+            const matterData = matter(content);
 
-			return `"${apiPath}${matterData.data.id}"`;
-		})
-	);
+            return apiPath.replace(`[slug]`, matterData.data.id);
+        }),
+    );
 };
-
 ```
 
 You could also call your db to get ids and so on
