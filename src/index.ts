@@ -51,7 +51,7 @@ const plugin = ({paths, repoRoot}: PluginOptions): Plugin => {
                 throw new Error(`Failed to read ${svelteConfigPath}`);
             }
 
-            const cleanedSvelteConfig = svelteConfig.replace(/entries:\s\[.+],/gmi, '');
+            const cleanedSvelteConfig = svelteConfig.replace(/entries:\s\[[\W\w]+?],/gmi, '');
             const modifiedSvelteConfig = cleanedSvelteConfig.replace(/prerender:\s*\{/gmi, `$&entries: [${entries.join(',')}],`);
 
             try {
