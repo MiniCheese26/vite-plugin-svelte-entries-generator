@@ -37,11 +37,6 @@ const plugin = ({paths, repoRoot}: PluginOptions): Plugin => {
 
             const root = repoRoot ?? config.root ?? process.cwd();
 
-            const entries = ['"*"', ...(await Promise.all(paths.map(async (path) => {
-                console.info(`[vite-plugin-svelte-entries-generator] - Running transformer for ${path.apiPath}`);
-                return `"${await path.transform(path.apiPath, root)}"`;
-            }))).flat()];
-
             const svelteConfigPath = pathFs.resolve(root, SVELTE_CONFIG_FILE);
             let svelteConfig: string;
 
@@ -50,6 +45,11 @@ const plugin = ({paths, repoRoot}: PluginOptions): Plugin => {
             } catch (e) {
                 throw new Error(`Failed to read ${svelteConfigPath}`);
             }
+
+            const entries = ['"*"', ...(await Promise.all(paths.map(async (path) => {
+                console.info(`[vite-plugin-svelte-entries-generator] - Running transformer for ${path.apiPath}`);
+                return `"${await path.transform(path.apiPath, root)}"`;
+            }))).flat()];
 
             const cleanedSvelteConfig = svelteConfig.replace(/entries:\s\[[\W\w]+?],/gmi, '');
             const modifiedSvelteConfig = cleanedSvelteConfig.replace(/prerender:\s*\{/gmi, `$&entries: [${entries.join(',')}],`);
