@@ -4,13 +4,14 @@ import fs from 'fs/promises';
 
 export type EntriesTransformFunction = (apiPath: string, repoRoot: string) => Promise<string | string[]> | string | string[]
 
-interface Path {
+export interface Path {
     apiPath: string,
     transform: EntriesTransformFunction,
 }
 
 export interface PluginOptions {
     paths: Path[],
+    repoRoot?: string,
 }
 
 const PLUGIN_NAME = 'vite-plugin-svelte-entries-generator';
@@ -18,7 +19,7 @@ const SVELTE_CONFIG_FILE = 'svelte.config.js';
 
 let hasRun = false;
 
-const plugin = ({paths}: PluginOptions): Plugin => {
+const plugin = ({paths, repoRoot}: PluginOptions): Plugin => {
     return {
         name: PLUGIN_NAME,
         apply: 'build',
@@ -34,7 +35,7 @@ const plugin = ({paths}: PluginOptions): Plugin => {
                 return;
             }
 
-            const root = config.root ?? process.cwd();
+            const root = repoRoot ?? config.root ?? process.cwd();
 
             const entries = ['"*"', ...(await Promise.all(paths.map(async (path) => {
                 console.info(`[vite-plugin-svelte-entries-generator] - Running transformer for ${path.apiPath}`)
