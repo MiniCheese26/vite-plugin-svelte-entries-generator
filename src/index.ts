@@ -12,14 +12,17 @@ export interface Path {
 export interface PluginOptions {
     paths: Path[],
     repoRoot?: string,
+    svelteConfigPath?: string,
 }
 
 const PLUGIN_NAME = 'vite-plugin-svelte-entries-generator';
 const SVELTE_CONFIG_FILE = 'svelte.config.js';
 
+const wrap = (text: string) => `"${text}"`;
+
 let hasRun = false;
 
-const plugin = ({paths, repoRoot}: PluginOptions): Plugin => {
+const plugin = ({paths, repoRoot, svelteConfigPath: userSvelteConfigPath}: PluginOptions): Plugin => {
     return {
         name: PLUGIN_NAME,
         apply: 'build',
@@ -37,7 +40,7 @@ const plugin = ({paths, repoRoot}: PluginOptions): Plugin => {
 
             const root = repoRoot ?? config.root ?? process.cwd();
 
-            const svelteConfigPath = pathFs.resolve(root, SVELTE_CONFIG_FILE);
+            const svelteConfigPath = userSvelteConfigPath ?? pathFs.resolve(root, SVELTE_CONFIG_FILE);
             let svelteConfig: string;
 
             try {
@@ -48,7 +51,15 @@ const plugin = ({paths, repoRoot}: PluginOptions): Plugin => {
 
             const entries = ['"*"', ...(await Promise.all(paths.map(async (path) => {
                 console.info(`[vite-plugin-svelte-entries-generator] - Running transformer for ${path.apiPath}`);
-                return `"${await path.transform(path.apiPath, root)}"`;
+                const transformerResult = await path.transform(path.apiPath, root);
+
+                if (Array.isArray(transformerResult)) {
+                    return transformerResult.map(wrap);
+                } else if (transformerResult.length > 0) {
+                    return wrap(transformerResult);
+                }
+
+                return [];
             }))).flat()];
 
             const cleanedSvelteConfig = svelteConfig.replace(/entries:\s\[[\W\w]+?],/gmi, '');
