@@ -16,6 +16,7 @@ But this in inflexible and isn't simple to automate. Hence, this plugin. With th
 base api paths and a transformer function to auto-generate the entries array upon `vite build`.
 
 ### There is an open [issue](https://github.com/sveltejs/kit/issues/9506), opened by Rich Harris that'll hopefully render this plugin obsolete
+
 ### There is also an open [pr](https://github.com/sveltejs/kit/pull/9571)
 
 ## Usage
@@ -43,6 +44,8 @@ The `prerender` object can have other data in it, just make sure it exists.
 - `paths: Path[]` - An array of [Paths](#paths)
 - `repoRoot?: string` - The absolute path of the current repo. If this isn't passed it will be derived from the vite
   config root prop or if that's undefined `process.cwd()`
+- `svelteConfigPath?: string` - Absolute path to your `svelte.config.js` file. If this isn't passed, it will be assumed it is
+  located at `<repoRoot>/svelte.config.js`.
 
 #### Paths
 
@@ -50,7 +53,8 @@ The `prerender` object can have other data in it, just make sure it exists.
   I.E. `/posts/[slug]`
 - `transform: (apiPath: string, repoRoot: string) => Promise<string | string[]> | string | string[]` - A function that
   provides the apiPath being processed and the absolute path of the repo. This function
-  generates the entry for sveltekit to discover. I'd recommend you `.replace()` on the `apiPath`, replacing the dynamic parameters
+  generates the entry for sveltekit to discover. I'd recommend you `.replace()` on the `apiPath`, replacing the dynamic
+  parameters
   with your slug/id/whatever. See [below](#transform-examples) for examples.
 
 ```js
