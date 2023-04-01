@@ -16,6 +16,7 @@ But this in inflexible and isn't simple to automate. Hence, this plugin. With th
 base api paths and a transformer function to auto-generate the entries array upon `vite build`.
 
 ### There is an open [issue](https://github.com/sveltejs/kit/issues/9506), opened by Rich Harris that'll hopefully render this plugin obsolete
+### There is also an open [pr](https://github.com/sveltejs/kit/pull/9571)
 
 ## Usage
 
