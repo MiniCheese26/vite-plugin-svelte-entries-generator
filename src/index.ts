@@ -62,7 +62,7 @@ const plugin = ({paths, repoRoot, svelteConfigPath: userSvelteConfigPath}: Plugi
                 return [];
             }))).flat()];
 
-            const cleanedSvelteConfig = svelteConfig.replace(/entries:\s\[[\W\w]+?],/gmi, '');
+            const cleanedSvelteConfig = svelteConfig.replace(/entries:\s*\[[\W\w]+?],?/gmi, '');
             const modifiedSvelteConfig = cleanedSvelteConfig.replace(/prerender:\s*\{/gmi, `$&entries: [${entries.join(',')}],`);
 
             try {
