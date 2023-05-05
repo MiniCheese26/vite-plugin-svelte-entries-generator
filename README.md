@@ -1,5 +1,7 @@
 [![NPM Version](https://badge.fury.io/js/vite-plugin-svelte-entries-generator.svg?style=flat)](https://npmjs.org/package/vite-plugin-svelte-entries-generator)
 
+# This plugin is no longer required! Its functionality is now apart of [sveltekit!](https://kit.svelte.dev/docs/page-options#entries)
+
 # vite-plugin-svelte-entries-generator
 
 ## Doesn't sveltekit auto-discover all pages to pre-render?
@@ -14,10 +16,6 @@ the `prerender.entries` array in the svelte config to tell sveltekit about your 
 
 But this in inflexible and isn't simple to automate. Hence, this plugin. With this plugin, you can pass an array of
 base api paths and a transformer function to auto-generate the entries array upon `vite build`.
-
-### There is an open [issue](https://github.com/sveltejs/kit/issues/9506), opened by Rich Harris that'll hopefully render this plugin obsolete
-
-### There is also an open [pr](https://github.com/sveltejs/kit/pull/9571)
 
 ## Usage
 
